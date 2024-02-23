@@ -30,6 +30,7 @@ public class OpticDeviceServiceImpl implements OpticDeviceService {
     }
 
     @Override public OpticDevice read(UUID uuid) {
+        readFromYAML();
         return OpticDeviceServiceImpl.devices.stream()
                 .filter(opticDevice -> opticDevice.getUuid().equals(uuid))
                 .findFirst()
@@ -39,10 +40,12 @@ public class OpticDeviceServiceImpl implements OpticDeviceService {
     }
 
     @Override public List<OpticDevice> readAll() {
+        readFromYAML();
         return devices;
     }
 
     @Override public void delete(UUID uuid) {
+        readFromYAML();
         OpticDevice device = read(uuid);
         OpticDeviceServiceImpl.devices.remove(device);
         writeToYAML();

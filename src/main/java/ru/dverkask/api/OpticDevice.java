@@ -35,7 +35,8 @@ public class OpticDevice {
 
     @Override public String toString() {
         return "OpticDevice{" +
-                "opticPower=" + this.opticPower +
+                "uuid=" + this.uuid +
+                ", opticPower=" + this.opticPower +
                 ", focalDistance=" + this.focalDistance +
                 "}";
     }
