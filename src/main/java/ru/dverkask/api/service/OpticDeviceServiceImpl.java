@@ -1,8 +1,5 @@
 package ru.dverkask.api.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
 import lombok.SneakyThrows;
@@ -11,26 +8,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.dverkask.api.OpticDevice;
+import ru.dverkask.api.file.BasicYamlConfiguration;
+import ru.dverkask.api.file.DefaultOptions;
 
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.InputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class OpticDeviceServiceImpl implements OpticDeviceService {
-    private static final ObjectMapper      mapper  = new ObjectMapper(new YAMLFactory());
     private static       String            PATH_TO_DATA;
     private static final List<OpticDevice> devices = new ArrayList<>();
 
-    @Override public void create(@NonNull OpticDevice device) {
-        writeToYAML(device);
+    @SneakyThrows @Override public void save(@NonNull OpticDevice device) {
+        OpticDeviceServiceImpl.devices.add(device);
+        BasicYamlConfiguration.writeToYAML(PATH_TO_DATA, devices);
     }
 
-    @Override public OpticDevice read(UUID uuid) {
-        readFromYAML();
+    @Override public OpticDevice find(UUID uuid) {
+        init();
         return OpticDeviceServiceImpl.devices.stream()
                 .filter(opticDevice -> opticDevice.getUuid().equals(uuid))
                 .findFirst()
@@ -39,67 +37,50 @@ public class OpticDeviceServiceImpl implements OpticDeviceService {
                 ));
     }
 
-    @Override public List<OpticDevice> readAll() {
-        readFromYAML();
-        return devices;
+    @Override public List<OpticDevice> findAll() {
+        init();
+        return Collections.unmodifiableList(devices);
     }
 
-    @Override public void delete(UUID uuid) {
-        readFromYAML();
-        OpticDevice device = read(uuid);
+    @SneakyThrows @Override public void delete(UUID uuid) {
+        OpticDevice device = find(uuid);
         OpticDeviceServiceImpl.devices.remove(device);
-        writeToYAML();
+        BasicYamlConfiguration.writeToYAML(PATH_TO_DATA, devices);
     }
 
-    @Override public void zoomIn(UUID uuid,
+    @SneakyThrows @Override public void zoomIn(UUID uuid,
                                  Integer increase) {
-        OpticDevice device = read(uuid);
+        OpticDevice device = find(uuid);
         if (increase != null)
             device.zoomIn(increase);
-        writeToYAML();
+        BasicYamlConfiguration.writeToYAML(PATH_TO_DATA, devices);
     }
 
-    @Override public void zoomOut(UUID uuid,
+    @SneakyThrows @Override public void zoomOut(UUID uuid,
                                   Integer decrease) {
-        OpticDevice device = read(uuid);
+        OpticDevice device = find(uuid);
         if (decrease != null)
             device.zoomOut(decrease);
-        writeToYAML();
-    }
-
-    @SneakyThrows private static void readFromYAML() {
-        InputStream inputStream = new FileInputStream(PATH_TO_DATA);
-
-        List<OpticDevice> loadedDevices = mapper
-                .readValue(
-                        inputStream,
-                        new TypeReference<>() {
-                        }
-                );
-
-        if (loadedDevices != null) {
-            devices.clear();
-            devices.addAll(loadedDevices);
-        }
-    }
-
-    @SneakyThrows private static void writeToYAML() {
-        FileWriter fileWriter = new FileWriter(PATH_TO_DATA);
-        mapper.writeValue(fileWriter, devices);
-    }
-
-    @SneakyThrows private static void writeToYAML(@NonNull OpticDevice device) {
-        OpticDeviceServiceImpl.devices.add(device);
-        writeToYAML();
+        BasicYamlConfiguration.writeToYAML(PATH_TO_DATA, devices);
     }
 
     @PostConstruct
     private void init() {
-        readFromYAML();
+        try {
+            List<OpticDevice> loadedDevices = BasicYamlConfiguration.readFromYAML(PATH_TO_DATA);
+            if (loadedDevices != null) {
+                devices.clear();
+                devices.addAll(loadedDevices);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Value("${api.data.yaml.path}")
     private void setPathToData(String pathToData) {
-        PATH_TO_DATA = pathToData;
+        PATH_TO_DATA = BasicYamlConfiguration.isValidYamlPath(pathToData)
+                ? pathToData
+                : DefaultOptions.DEFAULT_DATA_PATH.getPath();
     }
 }

@@ -34,7 +34,7 @@ class RestApplicationTests {
         OpticDevice device1 = new OpticDevice(2);
         OpticDevice device2 = new OpticDevice(3);
         Mockito.when(
-                opticDeviceService.readAll()
+                opticDeviceService.findAll()
         ).thenReturn(Arrays.asList(device1, device2));
     }
 
@@ -42,21 +42,21 @@ class RestApplicationTests {
         mockMvc.perform(get("/api/devices")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-        Mockito.verify(opticDeviceService, Mockito.times(1)).readAll();
+        Mockito.verify(opticDeviceService, Mockito.times(1)).findAll();
     }
 
     @Test void getDeviceTest() throws Exception {
         UUID        uuid   = UUID.randomUUID();
         OpticDevice device = new OpticDevice(2);
         Mockito.when(
-                opticDeviceService.read(uuid)
+                opticDeviceService.find(uuid)
         ).thenReturn(device);
 
         mockMvc.perform(get("/api/devices/" + uuid)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        Mockito.verify(opticDeviceService, Mockito.times(1)).read(uuid);
+        Mockito.verify(opticDeviceService, Mockito.times(1)).find(uuid);
     }
 
     @Test void zoomInTest() throws Exception {
@@ -115,7 +115,7 @@ class RestApplicationTests {
         OpticDevice device = new OpticDevice(2);
 
         ArgumentCaptor<OpticDevice> captor = ArgumentCaptor.forClass(OpticDevice.class);
-        doAnswer(invocation -> null).when(opticDeviceService).create(captor.capture());
+        doAnswer(invocation -> null).when(opticDeviceService).save(captor.capture());
 
         String deviceJson = "{\"opticPower\": 2}";
 
@@ -124,7 +124,7 @@ class RestApplicationTests {
                         .content(deviceJson))
                 .andExpect(status().isCreated());
 
-        Mockito.verify(opticDeviceService, Mockito.times(1)).create(any(OpticDevice.class));
+        Mockito.verify(opticDeviceService, Mockito.times(1)).save(any(OpticDevice.class));
 
         OpticDevice actualDevice = captor.getValue();
         assertEquals(device.getOpticPower(), actualDevice.getOpticPower());

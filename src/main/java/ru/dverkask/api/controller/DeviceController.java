@@ -1,4 +1,4 @@
-package ru.dverkask.api.controllers;
+package ru.dverkask.api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.dverkask.api.OpticDevice;
 import ru.dverkask.api.service.OpticDeviceService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -21,37 +22,47 @@ public class DeviceController {
     }
     @GetMapping("/devices")
     public List<OpticDevice> getDevices() {
-        return service.readAll();
+        return service.findAll();
     }
 
     @GetMapping("/devices/{uuid}")
     public OpticDevice getDevice(@PathVariable UUID uuid) {
-        return service.read(uuid);
+        return service.find(uuid);
     }
 
     @PostMapping("/devices")
     public ResponseEntity<OpticDevice> createDevice(@RequestBody OpticDevice opticDevice) {
-        service.create(opticDevice);
+        service.save(opticDevice);
         return new ResponseEntity<>(opticDevice, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/devices/{uuid}")
-    public ResponseEntity<Void> deleteDevice(@PathVariable UUID uuid) {
+    public ResponseEntity<String> deleteDevice(@PathVariable UUID uuid) {
         service.delete(uuid);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/devices/{uuid}/zoomIn")
-    public void zoomIn(@PathVariable UUID uuid,
+    public ResponseEntity<Map<String, String>> zoomIn(@PathVariable UUID uuid,
                        @RequestBody Map<String, Integer> zoom) {
         Integer increase = zoom.get("zoom");
         service.zoomIn(uuid, increase);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Zoom level increased successfully!");
+
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/devices/{uuid}/zoomOut")
-    public void zoomOut(@PathVariable UUID uuid,
+    public ResponseEntity<Map<String, String>> zoomOut(@PathVariable UUID uuid,
                         @RequestBody Map<String, Integer> zoom) {
         Integer decrease = zoom.get("zoom");
         service.zoomOut(uuid, decrease);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Zoom level decreased successfully!");
+
+        return ResponseEntity.ok(response);
     }
 }
