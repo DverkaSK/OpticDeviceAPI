@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public interface AuthService {
     UserApiKey generate(String username, UserApiKey.Permission permission);
-    UserApiKey save(String path);
+    void save(UserApiKey apiKey);
     UserApiKey findByKey(UUID apiKey);
     boolean isValid(UUID apiKey);
     void deleteByKey(UUID apiKey);

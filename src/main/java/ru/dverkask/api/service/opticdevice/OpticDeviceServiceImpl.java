@@ -11,7 +11,6 @@ import ru.dverkask.api.OpticDevice;
 import ru.dverkask.api.file.BasicYamlConfiguration;
 import ru.dverkask.api.file.DefaultOptions;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,13 +41,13 @@ public class OpticDeviceServiceImpl implements OpticDeviceService {
         return Collections.unmodifiableList(devices);
     }
 
-    @SneakyThrows @Override public void delete(UUID uuid) {
+    @Override public void delete(UUID uuid) {
         OpticDevice device = find(uuid);
         OpticDeviceServiceImpl.devices.remove(device);
         BasicYamlConfiguration.writeToYAML(PATH_TO_DATA, devices);
     }
 
-    @SneakyThrows @Override public void zoomIn(UUID uuid,
+    @Override public void zoomIn(UUID uuid,
                                  Integer increase) {
         OpticDevice device = find(uuid);
         if (increase != null)
@@ -56,7 +55,7 @@ public class OpticDeviceServiceImpl implements OpticDeviceService {
         BasicYamlConfiguration.writeToYAML(PATH_TO_DATA, devices);
     }
 
-    @SneakyThrows @Override public void zoomOut(UUID uuid,
+    @Override public void zoomOut(UUID uuid,
                                   Integer decrease) {
         OpticDevice device = find(uuid);
         if (decrease != null)
@@ -66,14 +65,10 @@ public class OpticDeviceServiceImpl implements OpticDeviceService {
 
     @PostConstruct
     private void init() {
-        try {
-            List<OpticDevice> loadedDevices = BasicYamlConfiguration.readFromYAML(PATH_TO_DATA, OpticDevice.class);
-            if (loadedDevices != null) {
-                devices.clear();
-                devices.addAll(loadedDevices);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        List<OpticDevice> loadedDevices = BasicYamlConfiguration.readFromYAML(PATH_TO_DATA, OpticDevice.class);
+        if (loadedDevices != null) {
+            devices.clear();
+            devices.addAll(loadedDevices);
         }
     }
 
