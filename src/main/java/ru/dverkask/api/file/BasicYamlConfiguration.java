@@ -18,13 +18,13 @@ public class BasicYamlConfiguration {
         return file.exists() && file.isFile() && Paths.get(path).toString().endsWith(".yaml");
     }
 
-    public static List<OpticDevice> readFromYAML(String path) throws IOException {
+    public static <T> List<T> readFromYAML(String path, Class<T> clazz) throws IOException {
         if (!BasicYamlConfiguration.isValidYamlPath(path)) {
             throw new IllegalArgumentException("Invalid YAML path provided");
         }
 
         try (InputStream inputStream = new FileInputStream(path)) {
-            return mapper.readValue(inputStream, new TypeReference<>() {});
+            return mapper.readValue(inputStream, mapper.getTypeFactory().constructCollectionType(List.class, clazz));
         }
     }
 

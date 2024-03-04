@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.dverkask.api.OpticDevice;
-import ru.dverkask.api.service.OpticDeviceService;
+import ru.dverkask.api.service.opticdevice.OpticDeviceService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,10 +16,12 @@ import java.util.UUID;
 @RequestMapping("/api")
 public class DeviceController {
     private final OpticDeviceService service;
+
     @Autowired
     public DeviceController(OpticDeviceService service) {
         this.service = service;
     }
+
     @GetMapping("/devices")
     public List<OpticDevice> getDevices() {
         return service.findAll();
@@ -44,7 +46,7 @@ public class DeviceController {
 
     @PatchMapping("/devices/{uuid}/zoomIn")
     public ResponseEntity<Map<String, String>> zoomIn(@PathVariable UUID uuid,
-                       @RequestBody Map<String, Integer> zoom) {
+                                                      @RequestBody Map<String, Integer> zoom) {
         Integer increase = zoom.get("zoom");
         service.zoomIn(uuid, increase);
 
@@ -56,7 +58,7 @@ public class DeviceController {
 
     @PatchMapping("/devices/{uuid}/zoomOut")
     public ResponseEntity<Map<String, String>> zoomOut(@PathVariable UUID uuid,
-                        @RequestBody Map<String, Integer> zoom) {
+                                                       @RequestBody Map<String, Integer> zoom) {
         Integer decrease = zoom.get("zoom");
         service.zoomOut(uuid, decrease);
 

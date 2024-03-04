@@ -1,4 +1,4 @@
-package ru.dverkask.api.service;
+package ru.dverkask.api.service.opticdevice;
 
 import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
@@ -67,7 +67,7 @@ public class OpticDeviceServiceImpl implements OpticDeviceService {
     @PostConstruct
     private void init() {
         try {
-            List<OpticDevice> loadedDevices = BasicYamlConfiguration.readFromYAML(PATH_TO_DATA);
+            List<OpticDevice> loadedDevices = BasicYamlConfiguration.readFromYAML(PATH_TO_DATA, OpticDevice.class);
             if (loadedDevices != null) {
                 devices.clear();
                 devices.addAll(loadedDevices);
