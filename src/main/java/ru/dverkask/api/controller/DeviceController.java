@@ -5,10 +5,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.dverkask.api.OpticDevice;
-import ru.dverkask.api.service.OpticDeviceService;
+import ru.dverkask.api.response.GenericResponse;
+import ru.dverkask.api.service.auth.AuthService;
+import ru.dverkask.api.service.auth.PermissionChecker;
+import ru.dverkask.api.service.auth.UserApiKey;
+import ru.dverkask.api.service.opticdevice.OpticDeviceService;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -16,53 +18,91 @@ import java.util.UUID;
 @RequestMapping("/api")
 public class DeviceController {
     private final OpticDeviceService service;
+    private final AuthService        authService;
+
     @Autowired
-    public DeviceController(OpticDeviceService service) {
+    public DeviceController(OpticDeviceService service, AuthService authService) {
         this.service = service;
+        this.authService = authService;
     }
+
+    private ResponseEntity<GenericResponse<?>> handleUnauthorized() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                new GenericResponse<>(401, "Invalid API key or insufficient permissions", null));
+    }
+
     @GetMapping("/devices")
-    public List<OpticDevice> getDevices() {
-        return service.findAll();
+    public ResponseEntity<GenericResponse<?>> getDevices(@RequestHeader("Authorization") UUID apiKey) {
+        UserApiKey userApiKey = authService.findByKey(apiKey);
+        return PermissionChecker.checkPermission(userApiKey, UserApiKey.Permission.READ, UserApiKey.Permission.ADMIN)
+                ? ResponseEntity.ok().body(new GenericResponse<>(200, "Success", service.findAll()))
+                : handleUnauthorized();
     }
 
     @GetMapping("/devices/{uuid}")
-    public OpticDevice getDevice(@PathVariable UUID uuid) {
-        return service.find(uuid);
+    public ResponseEntity<GenericResponse<?>> getDevice(@PathVariable UUID uuid,
+                                                        @RequestHeader("Authorization") UUID apiKey) {
+        UserApiKey userApiKey = authService.findByKey(apiKey);
+        return PermissionChecker.checkPermission(userApiKey, UserApiKey.Permission.READ, UserApiKey.Permission.ADMIN)
+                ? ResponseEntity.ok().body(new GenericResponse<>(200, "Success", service.find(uuid)))
+                : handleUnauthorized();
     }
 
     @PostMapping("/devices")
-    public ResponseEntity<OpticDevice> createDevice(@RequestBody OpticDevice opticDevice) {
-        service.save(opticDevice);
-        return new ResponseEntity<>(opticDevice, HttpStatus.CREATED);
+    public ResponseEntity<GenericResponse<?>> createDevice(@RequestBody OpticDevice opticDevice,
+                                                           @RequestHeader("Authorization") UUID apiKey) {
+        UserApiKey userApiKey = authService.findByKey(apiKey);
+        if (PermissionChecker.checkPermission(userApiKey, UserApiKey.Permission.WRITE, UserApiKey.Permission.ADMIN)) {
+            service.save(opticDevice);
+            return ResponseEntity.status(HttpStatus.CREATED).body(
+                    new GenericResponse<>(201, "Device created successfully", opticDevice)
+            );
+        }
+        return handleUnauthorized();
     }
 
     @DeleteMapping("/devices/{uuid}")
-    public ResponseEntity<String> deleteDevice(@PathVariable UUID uuid) {
-        service.delete(uuid);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<GenericResponse<?>> deleteDevice(@PathVariable UUID uuid,
+                                                           @RequestHeader("Authorization") UUID apiKey) {
+        UserApiKey userApiKey = authService.findByKey(apiKey);
+        if (PermissionChecker.checkPermission(userApiKey, UserApiKey.Permission.WRITE, UserApiKey.Permission.ADMIN)) {
+            service.delete(uuid);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
+                    new GenericResponse<>(204, "Device delete successfully", null)
+            );
+        }
+        return handleUnauthorized();
     }
 
     @PatchMapping("/devices/{uuid}/zoomIn")
-    public ResponseEntity<Map<String, String>> zoomIn(@PathVariable UUID uuid,
-                       @RequestBody Map<String, Integer> zoom) {
-        Integer increase = zoom.get("zoom");
-        service.zoomIn(uuid, increase);
+    public ResponseEntity<GenericResponse<?>> zoomIn(@PathVariable UUID uuid,
+                                                     @RequestBody Map<String, Integer> zoom,
+                                                     @RequestHeader("Authorization") UUID apiKey) {
+        UserApiKey userApiKey = authService.findByKey(apiKey);
+        if (PermissionChecker.checkPermission(userApiKey, UserApiKey.Permission.WRITE, UserApiKey.Permission.ADMIN)) {
+            Integer increase = zoom.get("zoom");
+            service.zoomIn(uuid, increase);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Zoom level increased successfully!");
-
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok().body(
+                    new GenericResponse<>(200, "Zoom level increased successfully!", null)
+            );
+        }
+        return handleUnauthorized();
     }
 
     @PatchMapping("/devices/{uuid}/zoomOut")
-    public ResponseEntity<Map<String, String>> zoomOut(@PathVariable UUID uuid,
-                        @RequestBody Map<String, Integer> zoom) {
-        Integer decrease = zoom.get("zoom");
-        service.zoomOut(uuid, decrease);
+    public ResponseEntity<GenericResponse<?>> zoomOut(@PathVariable UUID uuid,
+                                                      @RequestBody Map<String, Integer> zoom,
+                                                      @RequestHeader("Authorization") UUID apiKey) {
+        UserApiKey userApiKey = authService.findByKey(apiKey);
+        if (PermissionChecker.checkPermission(userApiKey, UserApiKey.Permission.WRITE, UserApiKey.Permission.ADMIN)) {
+            Integer decrease = zoom.get("zoom");
+            service.zoomOut(uuid, decrease);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Zoom level decreased successfully!");
-
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok().body(
+                    new GenericResponse<>(200, "Zoom level decreased successfully!", null)
+            );
+        }
+        return handleUnauthorized();
     }
 }

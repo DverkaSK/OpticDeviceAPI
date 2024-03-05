@@ -1,4 +1,4 @@
-package ru.dverkask.api.service;
+package ru.dverkask.api.service.opticdevice;
 
 import lombok.NonNull;
 import ru.dverkask.api.OpticDevice;
