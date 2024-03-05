@@ -8,3 +8,9 @@
 - opticPower: 20.0
   uuid: "1dcb884c-d484-4e26-9f2b-5026a7d4b895"
   focalDistance: 0.05
+- opticPower: 20.0
+  uuid: "d8f698ec-4d23-4e9e-915c-e675377a3d37"
+  focalDistance: 0.05
+- opticPower: 20.0
+  uuid: "cf18504b-c955-477e-9d3b-1d3de9893e79"
+  focalDistance: 0.05

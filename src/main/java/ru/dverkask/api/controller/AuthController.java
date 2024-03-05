@@ -1,5 +1,8 @@
 package ru.dverkask.api.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jdk.jfr.Threshold;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "AuthController", description = "Контроллер для создяния API ключей")
 public class AuthController {
     private final AuthService authService;
     @Autowired
@@ -24,6 +28,12 @@ public class AuthController {
     }
 
     @PostMapping("generate-key")
+    @Operation(
+            summary = "Создаёт API ключ",
+            description = "Для создания API ключа в параметрах запроса " +
+                    "необходимо указать username и опционально указать " +
+                    "права (READ, WRITE, ADMIN), по умолчанию права READ"
+    )
     public ResponseEntity<Map<String, UUID>> generateApiKey(@RequestParam(required = true) String username,
                                                             @RequestParam(required = false) UserApiKey.Permission permission) {
         if (permission == null)
