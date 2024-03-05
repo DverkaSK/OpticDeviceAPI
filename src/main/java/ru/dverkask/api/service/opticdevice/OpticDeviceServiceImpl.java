@@ -21,7 +21,7 @@ public class OpticDeviceServiceImpl implements OpticDeviceService {
     private static       String            PATH_TO_DATA;
     private static final List<OpticDevice> devices = new ArrayList<>();
 
-    @SneakyThrows @Override public void save(@NonNull OpticDevice device) {
+    @Override public void save(@NonNull OpticDevice device) {
         OpticDeviceServiceImpl.devices.add(device);
         BasicYamlConfiguration.writeToYAML(PATH_TO_DATA, devices);
     }
