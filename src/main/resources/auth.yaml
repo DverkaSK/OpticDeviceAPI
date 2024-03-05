@@ -10,3 +10,36 @@
   - 46
   - 42893800
   permission: "READ"
+- uuid: "df017e7f-83ed-487b-9d57-ac4d2db0618e"
+  username: "lol"
+  created:
+  - 2024
+  - 3
+  - 5
+  - 19
+  - 8
+  - 30
+  - 144003100
+  permission: "WRITE"
+- uuid: "b7e5a9ff-c2d6-441a-9d15-1fd90a433262"
+  username: "kek"
+  created:
+  - 2024
+  - 3
+  - 5
+  - 19
+  - 11
+  - 1
+  - 662537400
+  permission: "ADMIN"
+- uuid: "5ec41b61-6a83-43a6-b35d-1a95c7497be1"
+  username: "mama"
+  created:
+  - 2024
+  - 3
+  - 5
+  - 20
+  - 55
+  - 18
+  - 219558400
+  permission: "WRITE"

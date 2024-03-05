@@ -1,5 +1,7 @@
 package ru.dverkask.api.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@Tag(name = "InfoController", description = "Контроллер для вывода информации о приложении")
 public class InfoController {
     private final OpticDeviceService opticDeviceService;
     @Autowired
@@ -17,6 +20,11 @@ public class InfoController {
         this.opticDeviceService = opticDeviceService;
     }
     @GetMapping("/info")
+    @Operation(
+            summary = "Вывод информации о приложении",
+            description = "Выводит полную информацию о приложении, включая" +
+                    "название, версию, автора, год, количество устройств"
+    )
     public ResponseEntity<Map<String, String>> info() {
         Map<String, String> info = new HashMap<>();
 

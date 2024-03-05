@@ -1,5 +1,7 @@
 package ru.dverkask.api.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = "DeviceController", description = "Контроллер реализации REST API")
 public class DeviceController {
     private final OpticDeviceService service;
     private final AuthService        authService;
@@ -32,6 +35,10 @@ public class DeviceController {
     }
 
     @GetMapping("/devices")
+    @Operation(
+            summary = "Возвращает список всех объектов",
+            description = "Возвращает список объектов OpticDevice, если API ключ имеет право ADMIN или READ"
+    )
     public ResponseEntity<GenericResponse<?>> getDevices(@RequestHeader("Authorization") UUID apiKey) {
         UserApiKey userApiKey = authService.findByKey(apiKey);
         return PermissionChecker.checkPermission(userApiKey, UserApiKey.Permission.READ, UserApiKey.Permission.ADMIN)
@@ -40,6 +47,11 @@ public class DeviceController {
     }
 
     @GetMapping("/devices/{uuid}")
+    @Operation(
+            summary = "Возвращает конкретный объект по UUID",
+            description = "Возвращает объект OpticDevice по UUID," +
+                    " если пользователь указал API ключ с правами READ или ADMIN"
+    )
     public ResponseEntity<GenericResponse<?>> getDevice(@PathVariable UUID uuid,
                                                         @RequestHeader("Authorization") UUID apiKey) {
         UserApiKey userApiKey = authService.findByKey(apiKey);
@@ -49,6 +61,12 @@ public class DeviceController {
     }
 
     @PostMapping("/devices")
+    @Operation(
+            summary = "Создаёт новый объект",
+            description = "Создаёт новый объект, для этого требуется в тело" +
+                    " запроса задать параметр opticPower. Для запроса необходим API ключ с " +
+                    "правами WRITE или ADMIN"
+    )
     public ResponseEntity<GenericResponse<?>> createDevice(@RequestBody OpticDevice opticDevice,
                                                            @RequestHeader("Authorization") UUID apiKey) {
         UserApiKey userApiKey = authService.findByKey(apiKey);
@@ -62,6 +80,11 @@ public class DeviceController {
     }
 
     @DeleteMapping("/devices/{uuid}")
+    @Operation(
+            summary = "Удаляет объект",
+            description = "Удаляет объект по UUID, нужен API ключ " +
+                    "с правами WRITE или ADMIN"
+    )
     public ResponseEntity<GenericResponse<?>> deleteDevice(@PathVariable UUID uuid,
                                                            @RequestHeader("Authorization") UUID apiKey) {
         UserApiKey userApiKey = authService.findByKey(apiKey);
@@ -75,6 +98,12 @@ public class DeviceController {
     }
 
     @PatchMapping("/devices/{uuid}/zoomIn")
+    @Operation(
+            summary = "Реализует метод приближения",
+            description = "Требуется API ключ с правами " +
+                    "WRITE или ADMIN, приближает объект с помощью " +
+                    "умножения opticPower на zoom"
+    )
     public ResponseEntity<GenericResponse<?>> zoomIn(@PathVariable UUID uuid,
                                                      @RequestBody Map<String, Integer> zoom,
                                                      @RequestHeader("Authorization") UUID apiKey) {
@@ -91,6 +120,12 @@ public class DeviceController {
     }
 
     @PatchMapping("/devices/{uuid}/zoomOut")
+    @Operation(
+            summary = "Реализует метод отдаления",
+            description = "Требуется API ключ с правами " +
+                    "WRITE или ADMIN, приближает объект с помощью " +
+                    "деления opticPower на zoom"
+    )
     public ResponseEntity<GenericResponse<?>> zoomOut(@PathVariable UUID uuid,
                                                       @RequestBody Map<String, Integer> zoom,
                                                       @RequestHeader("Authorization") UUID apiKey) {
