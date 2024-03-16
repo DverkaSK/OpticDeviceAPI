@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.dverkask.api.service.opticdevice.OpticDeviceService;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
@@ -26,11 +27,12 @@ public class InfoController {
                     "название, версию, автора, год, количество устройств"
     )
     public ResponseEntity<Map<String, String>> info() {
-        Map<String, String> info = new HashMap<>();
+        Map<String, String> info = new LinkedHashMap<>();
 
         info.put("name", "OpticDeviceAPI");
         info.put("version", "1.0");
-        info.put("author", "DverkaSK");
+        info.put("javaVersion", "17");
+        info.put("author", "Igor Dorokhin");
         info.put("year", "2024");
         info.put("devicesCount", String.valueOf(opticDeviceService.findAll().size()));
 

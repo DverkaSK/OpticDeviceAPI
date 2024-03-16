@@ -140,4 +140,22 @@ public class DeviceController {
         }
         return handleUnauthorized();
     }
+
+    @GetMapping("/devices/percentile/{percentileValue}")
+    @Operation(
+            summary = "Рассчитывает процентиль для opticPower",
+            description = "Рассчитывает и возвращает процентиль для opticPower всех устройств, "
+                    + "если API ключ имеет право ADMIN или READ"
+    )
+    public ResponseEntity<GenericResponse<?>> getDevicesPercentile(@PathVariable double percentileValue,
+                                                                   @RequestHeader("Authorization") UUID apiKey) {
+        UserApiKey userApiKey = authService.findByKey(apiKey);
+        if (PermissionChecker.checkPermission(userApiKey, UserApiKey.Permission.READ, UserApiKey.Permission.ADMIN)) {
+            double percentile = service.calculatePercentile(service.findAll(), percentileValue);
+            return ResponseEntity.ok().body(
+                    new GenericResponse<>(200, "Success", percentile)
+            );
+        }
+        return handleUnauthorized();
+    }
 }
