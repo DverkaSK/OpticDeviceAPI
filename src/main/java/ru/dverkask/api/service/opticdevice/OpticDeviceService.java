@@ -11,6 +11,7 @@ public interface OpticDeviceService {
     void save(@NonNull OpticDevice device);
     OpticDevice find(UUID uuid);
     List<OpticDevice> findAll();
+    double calculatePercentile(List<OpticDevice> devices, double percentileValue);
     void delete(UUID uuid);
     void zoomIn(UUID uuid, Integer increase);
     void zoomOut(UUID uuid, Integer decrease);

@@ -2,7 +2,7 @@ package ru.dverkask.api.service.opticdevice;
 
 import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
-import lombok.SneakyThrows;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -61,6 +61,16 @@ public class OpticDeviceServiceImpl implements OpticDeviceService {
         if (decrease != null)
             device.zoomOut(decrease);
         BasicYamlConfiguration.writeToYAML(PATH_TO_DATA, devices);
+    }
+
+    @Override public double calculatePercentile(List<OpticDevice> devices, double percentileValue) {
+        double[] opticPowers = devices.stream()
+                .mapToDouble(OpticDevice::getOpticPower)
+                .sorted()
+                .toArray();
+
+        Percentile percentile = new Percentile();
+        return percentile.evaluate(opticPowers, percentileValue);
     }
 
     @PostConstruct
